@@ -4,8 +4,7 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "lint": "eslint frontend/src/**/*.js frontend/src/**/*.jsx"
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
