@@ -1,3 +1,6 @@
+# APSEC Project
+- This is a draft for the APSEC Project
+
 ## Roles (TBC)
 
 | Feature               | Student   | Teacher Assistant        | Teacher   | Admin     |
@@ -50,3 +53,7 @@
 | Student Page      | /api/student           | GET    | Only authenticated and student accounts can access this API           |
 | Dashboard Page    | /api/dashboard         | GET    | All authenticated users can access this API                           |
 | Home Page         | /api/home              | GET    | All users can access this page                                        |
+
+## Author
+- Dylan Yeo (yaboywf)
+- @ 2025 Dylan Yeo. All Rights Reserved.
