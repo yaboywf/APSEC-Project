@@ -39,7 +39,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
     const user = req.user;
     const token = jwt.sign({ id: user._id.toString(), username: user.username, account_type: user.account_type }, process.env.APP_SECRET, { expiresIn: '2h' });
-    return res.json({ message: 'Login successful', token });
+    return res.json({ message: 'Login successful', token: token, account_type: user.account_type });
 };
 
 /**

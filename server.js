@@ -56,6 +56,10 @@ app.get("/api/dashboard", verify, (req, res) => {
     return res.json({ message: "You have access to this page regardless of role. You are logged in", user: req.user });
 });
 
+app.get("/api/home", (req, res) => {
+    return res.json({ message: "Everyone has access to this page" });
+});
+
 app.listen(PORT, (err) => {
     if (err) console.error(err);
     console.log(`Listening on port ${PORT}`)
