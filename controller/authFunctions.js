@@ -2,8 +2,13 @@ const bcrypt = require("bcryptjs");
 require('dotenv').config();
 const User = require("../database/users");
 const validator = require('validator');
-const jwt = require("jsonwebtoken");
 
+/**
+    * Registers a new user to the database
+    * @param {Request} req - request
+    * @param {Response} res - response
+    * @returns {Response}
+*/
 const register = async (req, res) => {
     try {
         const { username, password, email, account_type } = req;
@@ -21,7 +26,7 @@ const register = async (req, res) => {
         const accountTypeOptions = ["student", "teacher", "admin", "teacher-assistant"];
         if (!accountTypeOptions.includes(account_type.toLowerCase())) return res.status(400).json({ message: "Please enter a valid account type" });
 
-        const newMember = new User({ 
+        const newMember = new User({
             name: sanitizedUsername,
             email: sanitizedEmail,
             account_type: account_type,
@@ -36,11 +41,14 @@ const register = async (req, res) => {
     }
 };
 
-const login = async (req, res) => {
-    const user = req.user;
-    const token = jwt.sign({ id: user._id.toString(), username: user.username, account_type: user.account_type }, process.env.APP_SECRET, { expiresIn: '2h' });
-    return res.json({ message: 'Login successful', token: token, account_type: user.account_type });
-};
+const logout = async (req, res) => {
+    req.logout(err => {
+        if (err) {
+            return res.status(500).json({ message: 'Logout failed', error: err });
+        }
+    });
+    return res.json({ message: 'Logout successful' });
+}
 
 /**
     * Checks authentication
@@ -52,18 +60,13 @@ const login = async (req, res) => {
     * No given array of roles will allow all authorised to access that route.
     * @returns {void}
 */
-const verify = (role = ["student", "teacher", "admin", "teacher-assistant"]) => {
-    return async (req, res, next) => {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) return res.status(401).json({ message: 'Unauthorized. Missing token' });
-        jwt.verify(token, process.env.APP_SECRET, (err, decoded) => {
-            if (err) return res.status(401).json({ message: 'Invalid or expired token' });
-            console.log(decoded)
-            if (!role.includes(decoded.account_type)) return res.status(401).json({ message: 'Unauthorized. Invalid account type' });
-            req.user = decoded;
-            next();
-        });
-    }
+const verify = (role=["student", "teacher", "admin", "teacher-assistant"]) => {
+    return (req, res, next) => {
+        if (!req.isAuthenticated()) return res.status(401).json({ message: 'Unauthorized. Please login.' });
+        if (!role.includes(req.user.account_type)) return res.status(403).json({ message: 'Forbidden. You do not have the required permissions.' });
+
+        next();
+    };
 };
 
-module.exports = { register, login, verify };
+module.exports = { register, verify, logout };

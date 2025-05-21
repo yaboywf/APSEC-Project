@@ -4,6 +4,12 @@ const bcrypt = require('bcryptjs');
 const User = require('../database/users');
 const validator = require('validator');
 
+/**
+    * Validates a user via Passport JS
+    * @param {Request} req - request
+    * @param {Response} res - response
+    * @returns {Response}
+*/
 passport.use(new LocalStrategy(
     async (username, password, done) => {
         try {

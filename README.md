@@ -1,7 +1,7 @@
 # APSEC Project
 - This is a draft for the APSEC Project
 
-## Roles (TBC)
+## Roles
 
 | Feature               | Student   | Teacher Assistant        | Teacher   | Admin     |
 |-----------------------|-----------|-----------|-----------|-----------|
@@ -18,13 +18,6 @@
 - A flexible and modular authentication middleware for Node.js
 - Passport JS is used for the initial authentication via LocalStrategy
 
-### JWT
-- A token-based authentication system that is used to verify the user’s identity on subsequent requests.
-- The JWT is issued once the user logs in and is sent with each protected request to verify the user's authenticity.
-- Sent via authentication header
-    - Key: authorization
-    - Value: Bearer <i>token</i>
-
 ### Authentication Flow
 1. User Registration
     - The user keys in their username, password, email and account type
@@ -36,10 +29,9 @@
     - The user keys in their username and password
     - Frontend will perform basic checks (input not empty, etc)
     - Backend will perform the same checks again, as well as sanitise the input before verifying the user
-    - After verifying, backend will return a JWT token back to frontend, which stores it in local storage
-
+    
 3. Accessing protected routes
-    - JWT will be sent to backend for verification before the content is returned
+    - Passport JS with validate the session
     - Will deny access if not authenticated or unauthorised
 
 ## API Routes
