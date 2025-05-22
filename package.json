@@ -21,7 +21,9 @@
     "bcryptjs": "^2.4.3",
     "helmet": "^7.0.0",
     "passport": "^0.6.0",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "nodemon": "^3.0.1",
+    "express-session": "^1.17.3"
   },
   "scripts": {
     "start": "react-scripts start",
