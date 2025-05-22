@@ -11,10 +11,13 @@ function Login() {
 
         axios.post("http://127.0.0.1:3000/api/auth/login", { username, password }, { headers: { "Content-Type": "application/json" } })
         .then(resp => {
-            localStorage.setItem("token", resp.data.token);
-            console.log(resp.data.account_type);
+            console.log(resp.data.user);
+            if (resp.data.user) alert("Login successful as " + resp.data.user.account_type);
         })
-        .catch(err => console.error(err.response?.data))
+        .catch(() => {
+            alert("Incorrect username or password");
+            console.error("Login failed")
+        });
     }
 
     return (
