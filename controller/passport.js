@@ -13,7 +13,6 @@ const validator = require('validator');
 passport.use(new LocalStrategy(
     async (username, password, done) => {
         try {
-            if (!validator.isAlphanumeric(username)) return done(null, false, { message: 'Invalid username or password' });
             const sanitizedName = validator.escape(username);
             const user = await User.findOne({ name: sanitizedName });
             if (!user) return done(null, false, { message: 'Invalid username or password' });
