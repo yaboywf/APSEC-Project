@@ -81,7 +81,6 @@ const verify = (role = ["student", "teacher", "admin", "teacher-assistant"]) => 
         if (!userIdCookie) return res.status(401).json({ message: 'Missing authentication token' });
 
         const userId = userIdCookie.substring('userId='.length);
-        console.log(!userId)
         if (!userId) return res.status(401).json({ message: 'Missing authentication token' });
 
         if (!req.isAuthenticated()) return res.status(401).json({ message: 'Invalid session or session expired.' });

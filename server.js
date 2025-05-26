@@ -111,27 +111,27 @@ app.post("/api/auth/login", (req, res, next) => {
 
 // Protected page. Only admin can access.
 app.get("/api/admin", verify(role = ["admin"]), (req, res) => {
-    return res.json({ message: `Hello ${req.user.name} You have access to an admin only page` });
+    return res.json({ message: `Hello ${req.user.name}. You have access to an admin only page` });
 });
 
 // Protected page. Only teacher can access.
 app.get("/api/teacher", verify(role = ["teacher"]), (req, res) => {
-    return res.json({ message: "You have access to an teacher only page", user: req.user });
+    return res.json({ message: `Hello ${req.user.name}. You have access to an teacher only page` });
 });
 
 // Protected page. Only teacher assistant can access.
 app.get("/api/ta", verify(role = ["teacher-assistant"]), (req, res) => {
-    return res.json({ message: "You have access to an teacher assistant only page", user: req.user });
+    return res.json({ message: `Hello ${req.user.name}. You have access to an teacher assistant only page` });
 });
 
 // Protected page. Only student can access.
 app.get("/api/student", verify(role = ["student"]), (req, res) => {
-    return res.json({ message: "You have access to an student only page", user: req.user });
+    return res.json({ message: `Hello ${req.user.name}. You have access to an student only page` });
 });
 
 // Protected page. All authenticated users, regardless of role, can access.
 app.get("/api/dashboard", verify(), (req, res) => {
-    return res.json({ message: "You have access to this page regardless of role. You are logged in", user: req.user });
+    return res.json({ message: "You have access to this page, which requires authentication but is accessible regardless of role" });
 });
 
 // All users can access regardless of authentication or role.
