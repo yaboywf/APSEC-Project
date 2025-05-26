@@ -1,9 +1,10 @@
 const express = require("express");
-const cors = require("cors");
+// const cors = require("cors");
 const mongoose = require("mongoose");
 const session = require('express-session');
 const helmet = require("helmet");
 const passport = require('passport');
+const path = require("path");
 
 const { register, verify, logout } = require("./controller/authFunctions");
 require("./controller/passport");
@@ -12,20 +13,24 @@ const app = express();
 const PORT = 3000;
 require("dotenv").config();
 
-app.use(cors({
-    origin: ['http://localhost:3001', 'http://127.0.0.1:3001'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
-}));
-
 mongoose.set("strictQuery", true);
 mongoose.connect(process.env.DB_CONNECT)
-.then(() => console.log("Connected to DB!"))
-.catch((err) => console.log(err));
+    .then(() => console.log("Connected to DB!"))
+    .catch((err) => console.log(err));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(session({ secret: process.env.APP_SECRET, resave: false, saveUninitialized: false }));
+app.use(express.static(path.join(__dirname, 'build')));
+app.use(session({
+    name: 'userId',
+    secret: process.env.APP_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        secure: false, 
+        sameSite: 'lax'
+    }
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -90,8 +95,18 @@ app.post("/api/auth/register", (req, res) => {
 });
 
 // Route for login
-app.post("/api/auth/login", passport.authenticate('local'), (req, res) => {
-    return res.json({ user: req.user });
+app.post("/api/auth/login", (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if (err) { return next(err); }
+        if (!user) {
+            return res.status(401).json({ message: info.message || 'Login failed' });
+        }
+
+        req.logIn(user, (err) => {
+            if (err) { return next(err); }
+            return res.json({ message: 'Welcome back, ' + user.name + '!', user: user });
+        });
+    })(req, res, next);
 });
 
 // Protected page. Only admin can access.
@@ -126,6 +141,10 @@ app.get("/api/home", (req, res) => {
 
 app.post("/api/logout", verify(), (req, res) => {
     logout(req, res);
+});
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 app.listen(PORT, (err) => {

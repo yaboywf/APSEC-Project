@@ -1,10 +1,9 @@
-import React from "react";
 import axios from "axios";
 
 function Register() {
     const submitForm = (e) => {
         e.preventDefault();
-        // if (!e.target.checkValidity()) return;
+        if (!e.target.checkValidity()) return;
 
         const formData = new FormData(e.target);
         const username = formData.get("username");
@@ -13,8 +12,11 @@ function Register() {
         const account_type = formData.get("account_type");
 
         axios.post("http://127.0.0.1:3000/api/auth/register", { username, password, email, account_type }, { headers: { "Content-Type": "application/json" } })
-        .then(resp => console.log(resp))
-        .catch(err => console.error(err.response?.data))
+        .then(resp => {
+            console.log(resp);
+            alert(resp.data.message);
+        })
+        .catch(err => console.error(err))
     }
 
     return (

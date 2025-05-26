@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 
 function Login() {
@@ -9,10 +9,9 @@ function Login() {
         e.preventDefault();
         if (!e.target.checkValidity()) return;
 
-        axios.post("http://127.0.0.1:3000/api/auth/login", { username, password }, { headers: { "Content-Type": "application/json" } })
+        axios.post("api/auth/login", { username, password }, { headers: { "Content-Type": "application/json" }, withCredentials: true })
         .then(resp => {
-            console.log(resp.data.user);
-            if (resp.data.user) alert("Login successful as " + resp.data.user.account_type);
+            if (resp.data.user) alert(`Hello ${resp.data.user.name}! Login successful as ${resp.data.user.account_type}`);
         })
         .catch(() => {
             alert("Incorrect username or password");

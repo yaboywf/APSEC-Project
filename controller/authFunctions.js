@@ -12,9 +12,11 @@ const validator = require('validator');
 const register = async (req, res) => {
     try {
         const { username, password, email, account_type } = req;
-
+        
         if (username === "") return res.status(400).json({ message: "Please enter a username" });
         const sanitizedUsername = validator.escape(username);
+        const existingUser = await User.findOne({ username: sanitizedUsername });
+        if (existingUser) return res.status(400).json({ message: "Username already exists" });
 
         if (!validator.isEmail(email)) return res.status(400).json({ message: "Please enter a valid email" });
         const sanitizedEmail = validator.normalizeEmail(email);
