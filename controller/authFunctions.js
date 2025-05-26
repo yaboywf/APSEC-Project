@@ -74,17 +74,18 @@ const logout = async (req, res) => {
 const verify = (role = ["student", "teacher", "admin", "teacher-assistant"]) => {
     return (req, res, next) => {
         const cookies = req.headers.cookie;
-        if (cookies) {
-            const parts = cookies.split('=');
-            if (parts.length < 2 || parts[1] == '') {
-                return res.status(401).json({ message: 'Missing authentication token' });
-            }
-        } else {
-            return res.status(401).json({ message: 'Missing authentication token' });
-        }
+        if (!cookies) return res.status(401).json({ message: 'Missing authentication token' });
+
+        const cookieArray = cookies.split(';').map(cookie => cookie.trim());
+        const userIdCookie = cookieArray.find(cookie => cookie.startsWith('userId='));
+        if (!userIdCookie) return res.status(401).json({ message: 'Missing authentication token' });
+
+        const userId = userIdCookie.substring('userId='.length);
+        console.log(!userId)
+        if (!userId) return res.status(401).json({ message: 'Missing authentication token' });
 
         if (!req.isAuthenticated()) return res.status(401).json({ message: 'Invalid session or session expired.' });
-        if (!role.includes(req.user.account_type)) return res.status(403).json({ message: 'Forbidden. You do not have the required permissions.' });
+        if (!role.includes(req.user.account_type)) return res.status(403).json({ message: 'You do not have the required permissions.' });
 
         next();
     };
