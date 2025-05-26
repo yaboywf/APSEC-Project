@@ -104,14 +104,14 @@ app.post("/api/auth/login", (req, res, next) => {
 
         req.logIn(user, (err) => {
             if (err) { return next(err); }
-            return res.json({ message: 'Welcome back, ' + user.name + '!', user: user });
+            return res.json({ message: 'Welcome back, ' + user.name + '!' });
         });
     })(req, res, next);
 });
 
 // Protected page. Only admin can access.
 app.get("/api/admin", verify(role = ["admin"]), (req, res) => {
-    return res.json({ message: "You have access to an admin only page", user: req.user });
+    return res.json({ message: `Hello ${req.user.name} You have access to an admin only page` });
 });
 
 // Protected page. Only teacher can access.

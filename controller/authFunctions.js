@@ -12,10 +12,11 @@ const validator = require('validator');
 const register = async (req, res) => {
     try {
         const { username, password, email, account_type } = req;
-        
+
         if (username === "") return res.status(400).json({ message: "Please enter a username" });
         const sanitizedUsername = validator.escape(username);
-        const existingUser = await User.findOne({ username: sanitizedUsername });
+        const existingUser = await User.findOne({ name: sanitizedUsername });
+        console.log(existingUser);
         if (existingUser) return res.status(400).json({ message: "Username already exists" });
 
         if (!validator.isEmail(email)) return res.status(400).json({ message: "Please enter a valid email" });
@@ -43,12 +44,19 @@ const register = async (req, res) => {
     }
 };
 
+/**
+ * Logs out a user
+ * @param {Request} req - request
+ * @param {Response} res - response
+ * @returns {Response}
+ */
 const logout = async (req, res) => {
     req.logout(err => {
         if (err) {
             return res.status(500).json({ message: 'Logout failed', error: err });
         }
     });
+
     return res.json({ message: 'Logout successful' });
 }
 
@@ -62,9 +70,19 @@ const logout = async (req, res) => {
     * No given array of roles will allow all authorised to access that route.
     * @returns {void}
 */
-const verify = (role=["student", "teacher", "admin", "teacher-assistant"]) => {
+const verify = (role = ["student", "teacher", "admin", "teacher-assistant"]) => {
     return (req, res, next) => {
-        if (!req.isAuthenticated()) return res.status(401).json({ message: 'Unauthorized. Please login.' });
+        const cookies = req.headers.cookie;
+        if (cookies) {
+            const parts = cookies.split('=');
+            if (parts.length < 2 || parts[1] == '') {
+                return res.status(401).json({ message: 'Missing authentication token' });
+            }
+        } else {
+            return res.status(401).json({ message: 'Missing authentication token' });
+        }
+
+        if (!req.isAuthenticated()) return res.status(401).json({ message: 'Invalid session or session expired.' });
         if (!role.includes(req.user.account_type)) return res.status(403).json({ message: 'Forbidden. You do not have the required permissions.' });
 
         next();
