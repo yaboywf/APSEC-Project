@@ -4,7 +4,7 @@
 		"name": "APSEC Project Testing Collection",
 		"description": "This is a postman collection for APSEC Project Testing. It should test the following:\n1. Register API Success\n2. Register API Failure (Duplicate Username)\n3. Register API Failure (Duplicate Email)\n4. Login API Success\n5. Login API Failure (Wrong Username)\n6. Login API Failure (Wrong Password)\n7. Access Protected URL Succes\n8.Access Protected URL Failure - (no token)\n9.Access Protected URL Failure - (wrong token)\n10. Access Protected URL Failure - (Valid token from other role)\n\nThis should be done for all 4 roles in this application - Admin, Teacher, Teacher Assistant, Student.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "40127182"
+		"_exporter_id": "40127187"
 	},
 	"item": [
 		{
@@ -12,46 +12,6 @@
 			"request": {
 				"method": "POST",
 				"header": [
-					{
-						"key": "Cache-Control",
-						"value": "no-cache",
-						"type": "text"
-					},
-					{
-						"key": "Postman-Token",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "Host",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "User-Agent",
-						"value": "PostmanRuntime/7.39.1",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "*/*",
-						"type": "text"
-					},
-					{
-						"key": "Accept-Encoding",
-						"value": "gzip, deflate, br",
-						"type": "text"
-					},
-					{
-						"key": "Connection",
-						"value": "keep-alive",
-						"type": "text"
-					},
-					{
-						"key": "Content-Length",
-						"value": "16",
-						"type": "text"
-					},
 					{
 						"key": "Content-Type",
 						"value": "application/json",
@@ -88,46 +48,6 @@
 				"method": "POST",
 				"header": [
 					{
-						"key": "Cache-Control",
-						"value": "no-cache",
-						"type": "text"
-					},
-					{
-						"key": "Postman-Token",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "Host",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "User-Agent",
-						"value": "PostmanRuntime/7.39.1",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "*/*",
-						"type": "text"
-					},
-					{
-						"key": "Accept-Encoding",
-						"value": "gzip, deflate, br",
-						"type": "text"
-					},
-					{
-						"key": "Connection",
-						"value": "keep-alive",
-						"type": "text"
-					},
-					{
-						"key": "Content-Length",
-						"value": "16",
-						"type": "text"
-					},
-					{
 						"key": "Content-Type",
 						"value": "application/json",
 						"type": "text"
@@ -163,46 +83,6 @@
 				"method": "POST",
 				"header": [
 					{
-						"key": "Cache-Control",
-						"value": "no-cache",
-						"type": "text"
-					},
-					{
-						"key": "Postman-Token",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "Host",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "User-Agent",
-						"value": "PostmanRuntime/7.39.1",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "*/*",
-						"type": "text"
-					},
-					{
-						"key": "Accept-Encoding",
-						"value": "gzip, deflate, br",
-						"type": "text"
-					},
-					{
-						"key": "Connection",
-						"value": "keep-alive",
-						"type": "text"
-					},
-					{
-						"key": "Content-Length",
-						"value": "16",
-						"type": "text"
-					},
-					{
 						"key": "Content-Type",
 						"value": "application/json",
 						"type": "text"
@@ -210,7 +90,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n \"username\": \"new-admin\",\r\n  \"email\": \"new-admin@gmail.com\",\r\n  \"password\": \"12345\",\r\n  \"account_type\": \"admin\"\r\n}",
+					"raw": "{\r\n \"username\": \"newer-admin\",\r\n  \"email\": \"new-admin@gmail.com\",\r\n  \"password\": \"12345\",\r\n  \"account_type\": \"admin\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -238,46 +118,6 @@
 				"method": "POST",
 				"header": [
 					{
-						"key": "Cache-Control",
-						"value": "no-cache",
-						"type": "text"
-					},
-					{
-						"key": "Postman-Token",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "Host",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "User-Agent",
-						"value": "PostmanRuntime/7.39.1",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "*/*",
-						"type": "text"
-					},
-					{
-						"key": "Accept-Encoding",
-						"value": "gzip, deflate, br",
-						"type": "text"
-					},
-					{
-						"key": "Connection",
-						"value": "keep-alive",
-						"type": "text"
-					},
-					{
-						"key": "Content-Length",
-						"value": "16",
-						"type": "text"
-					},
-					{
 						"key": "Content-Type",
 						"value": "application/json",
 						"type": "text"
@@ -285,7 +125,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n \"username\": \"admin\",\r\n  \"password\": \"admin\",\r\n}",
+					"raw": "{\r\n \"username\": \"admin\",\r\n  \"password\": \"admin\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -313,46 +153,6 @@
 				"method": "POST",
 				"header": [
 					{
-						"key": "Cache-Control",
-						"value": "no-cache",
-						"type": "text"
-					},
-					{
-						"key": "Postman-Token",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "Host",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "User-Agent",
-						"value": "PostmanRuntime/7.39.1",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "*/*",
-						"type": "text"
-					},
-					{
-						"key": "Accept-Encoding",
-						"value": "gzip, deflate, br",
-						"type": "text"
-					},
-					{
-						"key": "Connection",
-						"value": "keep-alive",
-						"type": "text"
-					},
-					{
-						"key": "Content-Length",
-						"value": "16",
-						"type": "text"
-					},
-					{
 						"key": "Content-Type",
 						"value": "application/json",
 						"type": "text"
@@ -360,7 +160,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n \"username\": \"admin123\",\r\n  \"password\": \"admin\",\r\n}",
+					"raw": "{\r\n \"username\": \"admin123\",\r\n  \"password\": \"admin\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -388,46 +188,6 @@
 				"method": "POST",
 				"header": [
 					{
-						"key": "Cache-Control",
-						"value": "no-cache",
-						"type": "text"
-					},
-					{
-						"key": "Postman-Token",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "Host",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "User-Agent",
-						"value": "PostmanRuntime/7.39.1",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "*/*",
-						"type": "text"
-					},
-					{
-						"key": "Accept-Encoding",
-						"value": "gzip, deflate, br",
-						"type": "text"
-					},
-					{
-						"key": "Connection",
-						"value": "keep-alive",
-						"type": "text"
-					},
-					{
-						"key": "Content-Length",
-						"value": "16",
-						"type": "text"
-					},
-					{
 						"key": "Content-Type",
 						"value": "application/json",
 						"type": "text"
@@ -435,7 +195,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n \"username\": \"admin\",\r\n  \"password\": \"admin123\",\r\n}",
+					"raw": "{\r\n \"username\": \"admin\",\r\n  \"password\": \"admin123\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -463,46 +223,6 @@
 				"method": "GET",
 				"header": [
 					{
-						"key": "Cache-Control",
-						"value": "no-cache",
-						"type": "text"
-					},
-					{
-						"key": "Postman-Token",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "Host",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "User-Agent",
-						"value": "PostmanRuntime/7.39.1",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "*/*",
-						"type": "text"
-					},
-					{
-						"key": "Accept-Encoding",
-						"value": "gzip, deflate, br",
-						"type": "text"
-					},
-					{
-						"key": "Connection",
-						"value": "keep-alive",
-						"type": "text"
-					},
-					{
-						"key": "Content-Length",
-						"value": "16",
-						"type": "text"
-					},
-					{
 						"key": "Content-Type",
 						"value": "application/json",
 						"type": "text"
@@ -527,46 +247,6 @@
 			"request": {
 				"method": "GET",
 				"header": [
-					{
-						"key": "Cache-Control",
-						"value": "no-cache",
-						"type": "text"
-					},
-					{
-						"key": "Postman-Token",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "Host",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "User-Agent",
-						"value": "PostmanRuntime/7.39.1",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "*/*",
-						"type": "text"
-					},
-					{
-						"key": "Accept-Encoding",
-						"value": "gzip, deflate, br",
-						"type": "text"
-					},
-					{
-						"key": "Connection",
-						"value": "keep-alive",
-						"type": "text"
-					},
-					{
-						"key": "Content-Length",
-						"value": "16",
-						"type": "text"
-					},
 					{
 						"key": "Content-Type",
 						"value": "application/json",
@@ -598,46 +278,6 @@
 				"method": "GET",
 				"header": [
 					{
-						"key": "Cache-Control",
-						"value": "no-cache",
-						"type": "text"
-					},
-					{
-						"key": "Postman-Token",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "Host",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "User-Agent",
-						"value": "PostmanRuntime/7.39.1",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "*/*",
-						"type": "text"
-					},
-					{
-						"key": "Accept-Encoding",
-						"value": "gzip, deflate, br",
-						"type": "text"
-					},
-					{
-						"key": "Connection",
-						"value": "keep-alive",
-						"type": "text"
-					},
-					{
-						"key": "Content-Length",
-						"value": "16",
-						"type": "text"
-					},
-					{
 						"key": "Content-Type",
 						"value": "application/json",
 						"type": "text"
@@ -667,46 +307,6 @@
 			"request": {
 				"method": "GET",
 				"header": [
-					{
-						"key": "Cache-Control",
-						"value": "no-cache",
-						"type": "text"
-					},
-					{
-						"key": "Postman-Token",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "Host",
-						"value": "<calculated when request is sent>",
-						"type": "text"
-					},
-					{
-						"key": "User-Agent",
-						"value": "PostmanRuntime/7.39.1",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "*/*",
-						"type": "text"
-					},
-					{
-						"key": "Accept-Encoding",
-						"value": "gzip, deflate, br",
-						"type": "text"
-					},
-					{
-						"key": "Connection",
-						"value": "keep-alive",
-						"type": "text"
-					},
-					{
-						"key": "Content-Length",
-						"value": "16",
-						"type": "text"
-					},
 					{
 						"key": "Content-Type",
 						"value": "application/json",

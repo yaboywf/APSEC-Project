@@ -16,11 +16,12 @@ const register = async (req, res) => {
         if (username === "") return res.status(400).json({ message: "Please enter a username" });
         const sanitizedUsername = validator.escape(username);
         const existingUser = await User.findOne({ name: sanitizedUsername });
-        console.log(existingUser);
         if (existingUser) return res.status(400).json({ message: "Username already exists" });
 
         if (!validator.isEmail(email)) return res.status(400).json({ message: "Please enter a valid email" });
         const sanitizedEmail = validator.normalizeEmail(email);
+        const existingEmail = await User.findOne({ email: sanitizedEmail });
+        if (existingEmail) return res.status(400).json({ message: "Email already exists" });
 
         if (password === "") return res.status(400).json({ message: "Please enter a password" });
         const sanitizedPassword = validator.trim(password);
