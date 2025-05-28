@@ -26,9 +26,13 @@ app.use(session({
     secret: process.env.APP_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { 
-        secure: false, 
-        sameSite: 'lax'
+    cookie: {
+        secure: false,
+        sameSite: 'lax',
+        cookie: {
+            maxAge: 30 * 60 * 1000
+        },
+        rolling: true
     }
 }));
 app.use(passport.initialize());
@@ -144,7 +148,7 @@ app.post("/api/logout", verify(), (req, res) => {
 });
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 app.listen(PORT, (err) => {
