@@ -1,5 +1,4 @@
 const express = require("express");
-// const cors = require("cors");
 const mongoose = require("mongoose");
 const session = require('express-session');
 const helmet = require("helmet");

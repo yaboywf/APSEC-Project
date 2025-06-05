@@ -1,0 +1,69 @@
+.login {
+    display: flex;
+    padding: 20px;
+    min-height: 100vh;
+    color: white;
+    align-items: center;
+
+    form {
+        width: 300px;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        gap: 20px;
+
+        label {
+            font-weight: bold;
+        }
+
+        input {
+            padding: 10px;
+            background-color: transparent;
+            border: none;
+            border-bottom: 1px solid white;
+            color: white;
+            outline: none;
+
+            &::placeholder {
+                color: white;
+            }
+        }
+
+        button {
+            padding: 10px;
+            border: none;
+            background-color: white;
+            color: black;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            font-weight: bold;
+            display: none;
+
+            &:before {
+                font: var(--fa-font-solid);
+                content: "\f06a";
+                margin-right: 5px;
+                color: red;
+            }
+        }
+
+        .fa {
+            margin-right: 5px;
+        }
+
+        p:last-of-type {
+            font-size: 14px;
+            text-align: center;
+        }
+
+        a {
+            color: white;
+        }
+    }
+}
