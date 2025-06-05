@@ -29,7 +29,7 @@ function Login() {
 	}
 	
 	return (
-		<div className="login" style={{ background: 'url(/login_bg.jpg) center/cover no-repeat' }}>
+		<div className="login" style={{ background: 'url(/login_bg.jpg) left/cover no-repeat' }}>
 			<form onSubmit={handleLogin} noValidate>
 				<label htmlFor="username">
 					<i className="fa fa-user"></i>

@@ -1,66 +1,89 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
 }
 
 *:not(.fa) {
-    font-family: sans-serif;
+	font-family: sans-serif;
 }
 
 main {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
 }
 
 .error_container {
-    position: absolute;
-    left: 50%;
-    z-index: 2;
-    pointer-events: none;
-    top: 10px;
-    transform: translateX(-50%);
-    width: 40vw;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+	position: absolute;
+	left: 50%;
+	z-index: 2;
+	pointer-events: none;
+	top: 10px;
+	transform: translateX(-50%);
+	width: 40vw;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
 
-    div {
-        background: red;
-        padding: 10px 15px;
-        color: white;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba($color: #fff, $alpha: 0.5);
-        animation: errorAnimation 5s ease-in-out forwards;
+	div {
+		background: red;
+		padding: 10px 15px;
+		color: white;
+		border-radius: 10px;
+		box-shadow: 0 0 10px rgba($color: #fff, $alpha: 0.5);
+		animation: errorAnimation 5s ease-in-out forwards;
 
-        &.success {
-            background: green !important;
-        }
+		&.success {
+			background: green !important;
+		}
 
-        &::before {
-            content: "\f06a";
-            font: var(--fa-font-solid);
-            margin-right: 10px;
-        }
-    }
+		&::before {
+			content: "\f06a";
+			font: var(--fa-font-solid);
+			margin-right: 10px;
+		}
+	}
 }
 
 @keyframes errorAnimation {
-    0% {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    5% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    95% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
+	0% {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+
+	5% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	95% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	100% {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+}
+
+@media screen and (max-width: 250px) {
+	main * {
+		display: none !important;
+	}
+
+	main::before {
+		display: block;
+        content: "Your device's viewport is too small to display any content.\A\AWe apologize for the inconvenience.";
+        position: absolute;
+        top: 50%;
+        font-family: sans-serif;
+        font-weight: bold;
+        left: 50%;
+        text-align: center;
+        text-wrap: wrap;
+        white-space: pre-line;
+        transform: translate(-50%, -50%);
+	}
 }

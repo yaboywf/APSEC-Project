@@ -30,3 +30,13 @@
         }
     }
 }
+
+@media screen and (max-width: 450px) {
+    .register form {
+        grid-template-columns: 1fr !important;
+
+        button, > p, .error {
+            grid-column: span 1 !important;
+        }
+    }
+}
