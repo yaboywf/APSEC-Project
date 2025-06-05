@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import '../styles/login.scss';
-import { showError, hideError } from './Functions';
+import { showError, hideError, addError } from './Functions';
 
 function Login() {
 	const [username, setUsername] = useState("");
@@ -19,12 +19,12 @@ function Login() {
 
 		axios.post("/api/auth/login", { username, password }, { headers: { "Content-Type": "application/json" }, withCredentials: true })
 		.then(resp => {
-			alert(resp.data.message);
+			addError(resp.data.message, "success");
 			console.log(resp.data);
 		})
 		.catch(err => {
 			console.log(err);
-			alert(err.response.data.message);
+			addError(err.response.data.message || "Login failed");
 		});
 	}
 	

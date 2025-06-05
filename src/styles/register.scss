@@ -1,0 +1,32 @@
+.register {
+    justify-content: center !important;
+
+    form {
+        width: 500px;
+        display: grid !important;
+        align-items: center;
+        grid-template-columns: max-content 1fr;
+        border: 1px solid white;
+        padding: 20px;
+        border-radius: 20px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+
+        select {
+            padding: 10px;
+            background-color: transparent;
+            border: none;
+            border-bottom: 1px solid white;
+            color: white;
+            outline: none;
+
+            option {
+                color: black;
+            }
+        }
+
+        button, > p, .error {
+            grid-column: span 2;
+        }
+    }
+}

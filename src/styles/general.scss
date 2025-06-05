@@ -13,3 +13,54 @@ main {
     flex-direction: column;
     min-height: 100vh;
 }
+
+.error_container {
+    position: absolute;
+    left: 50%;
+    z-index: 2;
+    pointer-events: none;
+    top: 10px;
+    transform: translateX(-50%);
+    width: 40vw;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    div {
+        background: red;
+        padding: 10px 15px;
+        color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba($color: #fff, $alpha: 0.5);
+        animation: errorAnimation 5s ease-in-out forwards;
+
+        &.success {
+            background: green !important;
+        }
+
+        &::before {
+            content: "\f06a";
+            font: var(--fa-font-solid);
+            margin-right: 10px;
+        }
+    }
+}
+
+@keyframes errorAnimation {
+    0% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    5% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    95% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+}
