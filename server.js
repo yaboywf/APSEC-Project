@@ -107,7 +107,7 @@ app.post("/api/auth/login", (req, res, next) => {
 
         req.logIn(user, (err) => {
             if (err) { return next(err); }
-            return res.json({ message: 'Welcome back, ' + user.name + '!' });
+            return res.json({ message: `Welcome back, ${user.name}!`, user: user });
         });
     })(req, res, next);
 });
@@ -147,7 +147,7 @@ app.get("/api/home", (req, res) => {
     return res.json({ message: "Everyone has access to this page" });
 });
 
-app.post("/api/logout", verify(), (req, res) => {
+app.post("/api/auth/logout", verify(), (req, res) => {
     logout(req, res);
 });
 
