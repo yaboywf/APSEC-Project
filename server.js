@@ -112,6 +112,11 @@ app.post("/api/auth/login", (req, res, next) => {
     })(req, res, next);
 });
 
+// Route to verify user for frontend
+app.get("/api/auth/verify", verify(), (req, res) => {
+    return res.json({ user: req.user });
+});
+
 // Protected page. Only admin can access.
 app.get("/api/admin", verify(role = ["admin"]), (req, res) => {
     return res.json({ message: `Hello ${req.user.name}. You have access to an admin only page` });

@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Login from './js/Login';
 import Register from './js/Register';
 import Layout from './js/Layout';
+import StudentPage from './js/StudentPage';
 
 import "./styles/general.scss";
 
@@ -16,6 +17,7 @@ root.render(
 					<Route path="/" element={<Login />} />
 					<Route path="/login" element={<Login />} />
 					<Route path="/register" element={<Register />} />
+					<Route path="/student" element={<StudentPage />} />
 				</Route>
 			</Routes>
 		</Router>
