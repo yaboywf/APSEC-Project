@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import '../styles/login.scss';
 import { showError, hideError, addError } from './Functions';
@@ -6,6 +7,7 @@ import { showError, hideError, addError } from './Functions';
 function Login() {
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
+	const navigate = useNavigate();
 
 	const handleLogin = async (e) => {
 		e.preventDefault();
@@ -20,12 +22,9 @@ function Login() {
 		axios.post("/api/auth/login", { username, password }, { headers: { "Content-Type": "application/json" }, withCredentials: true })
 		.then(resp => {
 			addError(resp.data.message, "success");
-			console.log(resp.data);
+			navigate(`/${resp.data?.user?.account_type}` || '/login');
 		})
-		.catch(err => {
-			console.log(err);
-			addError(err.response.data.message || "Login failed");
-		});
+		.catch(err => addError(err.response.data.message || "Login failed"));
 	}
 	
 	return (
