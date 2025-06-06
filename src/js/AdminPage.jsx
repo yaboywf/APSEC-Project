@@ -11,7 +11,7 @@ function AdminPage() {
     useEffect(() => {
         axios.get("/api/auth/verify", { headers: { "Content-Type": "application/json" }, withCredentials: true })
         .then(resp => {
-            if (resp.data.user.account_type !== "student") throw new Error("You do not have the required permissions");
+            if (resp.data.user.account_type !== "admin") throw new Error("You do not have the required permissions");
             setIsAuthenticated(true);
             setUserInfo(resp.data.user);
         })
