@@ -29,8 +29,12 @@ function TeacherPage() {
     }
 
     return (
-        <div>
-            {isAuthenticated === null && <div>Loading...</div>}
+        <div className="page">
+            {isAuthenticated === null && <div className="loader_container">
+                <div className="loader"></div>
+                <p>Loading...</p>
+            </div>}
+            
             {isAuthenticated && <>
                 <h1>Teacher Page</h1>
 
