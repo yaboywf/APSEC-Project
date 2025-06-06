@@ -9,8 +9,8 @@ const { register, verify, logout } = require("./controller/authFunctions");
 require("./controller/passport");
 
 const app = express();
-const PORT = 3000;
 require("dotenv").config();
+const PORT = process.env.PORT || 3000;
 
 mongoose.set("strictQuery", true);
 mongoose.connect(process.env.DB_CONNECT)
