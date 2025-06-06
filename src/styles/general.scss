@@ -51,6 +51,10 @@ main {
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
+
+	button {
+		width: 200px;
+	}
 }
 
 @keyframes errorAnimation {
