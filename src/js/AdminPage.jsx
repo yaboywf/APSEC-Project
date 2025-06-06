@@ -24,7 +24,12 @@ function AdminPage() {
 
     const logout = () => {
         axios.post("/api/auth/logout", {}, { headers: { "Content-Type": "application/json" }, withCredentials: true })
-        .then(() => navigate('/login'))
+        .then(resp => {
+            setIsAuthenticated(false);
+            setUserInfo({});
+            addError(resp.data.message, "success");
+            navigate('/login');
+        })
         .catch(err => addError(`Logout failed: ${err.response?.data?.message || err.message || "Unknown error"}`));
     }
 
@@ -34,7 +39,7 @@ function AdminPage() {
                 <div className="loader"></div>
                 <p>Loading...</p>
             </div>}
-            
+
             {isAuthenticated && <>
                 <h1>Admin Page</h1>
 
