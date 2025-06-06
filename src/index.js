@@ -5,6 +5,10 @@ import Login from './js/Login';
 import Register from './js/Register';
 import Layout from './js/Layout';
 import StudentPage from './js/StudentPage';
+import AdminPage from './js/AdminPage';
+import TeacherAssistantPage from './js/TeacherAssistantPage';
+import TeacherPage from './js/TeacherPage';
+import NotFound from './js/NotFound';
 
 import "./styles/general.scss";
 
@@ -18,6 +22,11 @@ root.render(
 					<Route path="/login" element={<Login />} />
 					<Route path="/register" element={<Register />} />
 					<Route path="/student" element={<StudentPage />} />
+					<Route path="/admin" element={<AdminPage />} />
+					<Route path="/teacher-assistant" element={<TeacherAssistantPage />} />
+					<Route path="/teacher" element={<TeacherPage />} />
+
+					<Route path="*" element={<NotFound />} />
 				</Route>
 			</Routes>
 		</Router>
