@@ -32,7 +32,8 @@ function Login() {
 			<form onSubmit={handleLogin} noValidate>
 				<label htmlFor="username">
 					<i className="fa fa-user"></i>
-					Username:</label>
+					Username:
+				</label>
 				<input type="text" id="username" name="username" autoComplete="username" autoFocus required placeholder="Enter Username" onInput={e => setUsername(e.target.value)} />
 
 				<p id="username_error" className="error"></p>
