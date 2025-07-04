@@ -20,6 +20,8 @@ passport.use(new LocalStrategy(
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) return done(null, false, { message: 'Invalid username or password' });
 
+            if (!user.completed_2fa) return done(null, false, { message: 'Please verify your account', user_id: user._id });
+
             return done(null, user);
         } catch (err) {
             return done(err);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { addError } from './Functions';
+import { showMessage } from './Functions';
 import { useNavigate } from 'react-router-dom';
 
 function TeacherAssistantPage() {
@@ -10,27 +10,27 @@ function TeacherAssistantPage() {
 
     useEffect(() => {
         axios.get("/api/auth/verify", { headers: { "Content-Type": "application/json" }, withCredentials: true })
-        .then(resp => {
-            if (resp.data.user.account_type !== "teacher-assistant") throw new Error("You do not have the required permissions");
-            setIsAuthenticated(true);
-            setUserInfo(resp.data.user);
-        })
-        .catch(err => {
-            setIsAuthenticated(false);
-            addError(`Authentication failed: ${err.response?.data?.message || err.message || "Unknown error"}`);
-            navigate('/login');
-        });
-    }, []);
+            .then(resp => {
+                if (resp.data.user.account_type !== "teacher-assistant") throw new Error("You do not have the required permissions");
+                setIsAuthenticated(true);
+                setUserInfo(resp.data.user);
+            })
+            .catch(err => {
+                setIsAuthenticated(false);
+                showMessage(`Authentication failed: ${err.response?.data?.message || err.message || "Unknown error"}`);
+                navigate('/login');
+            });
+    }, [navigate]);
 
     const logout = () => {
         axios.post("/api/auth/logout", {}, { headers: { "Content-Type": "application/json" }, withCredentials: true })
-        .then(resp => {
-            setIsAuthenticated(false);
-            setUserInfo({});
-            addError(resp.data.message, "success");
-            navigate('/login');
-        })
-        .catch(err => addError(`Logout failed: ${err.response?.data?.message || err.message || "Unknown error"}`));
+            .then(resp => {
+                setIsAuthenticated(false);
+                setUserInfo({});
+                showMessage(resp.data.message, "success");
+                navigate('/login');
+            })
+            .catch(err => showMessage(`Logout failed: ${err.response?.data?.message || err.message || "Unknown error"}`));
     }
 
     return (

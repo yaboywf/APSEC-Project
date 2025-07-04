@@ -34,11 +34,13 @@ const register = async (req, res) => {
             name: sanitizedUsername,
             email: sanitizedEmail,
             account_type: account_type,
-            password: hashedPassword
+            password: hashedPassword,
+            completed_2fa: false,
+            register_time: Date.now()
         });
 
         await newMember.save();
-        return res.json({ message: "You are now registered" });
+        return res.json({ message: "You are now registered", user_id: newMember._id });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: err.message });

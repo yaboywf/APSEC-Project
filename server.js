@@ -4,8 +4,13 @@ const session = require('express-session');
 const helmet = require("helmet");
 const passport = require('passport');
 const path = require("path");
+const speakeasy = require("speakeasy");
+const qrcode = require("qrcode");
+const cron = require('node-cron');
+const axios = require("axios");
 
 const { register, verify, logout } = require("./controller/authFunctions");
+const User = require('./database/users');
 require("./controller/passport");
 
 const app = express();
@@ -15,7 +20,7 @@ const PORT = process.env.PORT || 3000;
 mongoose.set("strictQuery", true);
 mongoose.connect(process.env.DB_CONNECT)
     .then(() => console.log("Connected to DB!"))
-    .catch((err) => console.log(err));
+    .catch(err => console.error(err));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -47,9 +52,9 @@ app.use(helmet({
     // Specifying which content can be loaded and executed by the browser
     contentSecurityPolicy: {
         directives: {
-            defaultSrc: ["'self'"],
+            defaultSrc: ["'self'", "https://www.google.com", "https://www.gstatic.com"],
             // Remove unsafe inline during production
-            scriptSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'", "https://www.google.com", "https://www.gstatic.com", "'unsafe-inline'"],
             objectSrc: ["'none'"],
             upgradeInsecureRequests: [],
         },
@@ -92,24 +97,55 @@ app.use(helmet({
     csrfPrevention: true,
 }));
 
+// Cron Job to remove unverified accounts after 24 hours
+cron.schedule('0 0 * * *', async () => {
+    const users = await User.find({ completed_2fa: false });
+
+    users.forEach(async (user) => {
+        const timeElapsed = (Date.now() - user.register_time) / (1000 * 60 * 60);
+        if (timeElapsed > 24) await User.deleteOne({ _id: user._id });
+    });
+});
+
 // Route for register
-app.post("/api/auth/register", (req, res) => {
-    register(req.body, res);
+app.post("/api/auth/register", async (req, res) => {
+    const captcha = req.body.captchaToken;
+
+    try {
+        const captchaResponse = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${process.env.CAPTCHA_SECRET}&response=${captcha}`);
+        const score = captchaResponse.data.score;
+
+        if (!score || score < 0.7) return res.status(400).json({ message: "Captcha verification failed" });
+        register(req.body, res);
+    } catch (error) {
+        return res.status(400).json({ message: "Captcha verification failed" });
+    }
 });
 
 // Route for login
-app.post("/api/auth/login", (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
-        if (err) { return next(err); }
-        if (!user) {
-            return res.status(401).json({ message: info.message || 'Login failed' });
-        }
+app.post("/api/auth/login", async (req, res, next) => {
+    const captcha = req.body.captchaToken;
 
-        req.logIn(user, (err) => {
+    try {
+        const captchaResponse = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${process.env.CAPTCHA_SECRET}&response=${captcha}`);
+        const score = captchaResponse.data.score;
+
+        if (!score || score < 0.7) return res.status(400).json({ message: "Captcha verification failed" });
+
+        passport.authenticate('local', (err, user, info) => {
             if (err) { return next(err); }
-            return res.json({ message: `Welcome back, ${user.name}!`, user: user });
-        });
-    })(req, res, next);
+            if (!user) {
+                return res.status(401).json({ message: info.message || 'Login failed' });
+            }
+
+            req.logIn(user, (err) => {
+                if (err) { return next(err); }
+                return res.json({ message: `Welcome back, ${user.name}!`, user: user });
+            });
+        })(req, res, next);
+    } catch (error) {
+        return res.status(500).json({ message: "Captcha verification failed" });
+    }
 });
 
 // Route to verify user for frontend
@@ -149,6 +185,62 @@ app.get("/api/home", (req, res) => {
 
 app.post("/api/auth/logout", verify(), (req, res) => {
     logout(req, res);
+});
+
+app.post('/api/auth/generate_2fa', async (req, res) => {
+    try {
+        if (!req.body.user_id) return res.status(400).json({ message: 'Missing user ID' });
+
+        // Generate a secret key
+        const secret = speakeasy.generateSecret({ name: 'MyApp' });
+
+        // Generate a QR code for the authenticator app
+        const data_url = await new Promise((resolve, reject) => {
+            qrcode.toDataURL(secret.otpauth_url, (err, url) => {
+                if (err) reject(`Error generating QR code: ${err}`);
+                else resolve(url);
+            });
+        });
+
+        await User.findOneAndUpdate({ _id: req.body.user_id }, { $set: { secret_key: secret.base32 } });
+
+        return res.json({ qrcode: data_url });
+    } catch (err) {
+        res.json({ message: `Error: ${err}` });
+    }
+});
+
+app.post('/api/auth/verify_2fa', async (req, res) => {
+    const captcha = req.body.captchaToken;
+
+    try {
+        const captchaResponse = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${process.env.CAPTCHA_SECRET}&response=${captcha}`);
+        const score = captchaResponse.data.score;
+
+        if (!score || score < 0.7) return res.status(400).json({ message: "Captcha verification failed" });
+
+        const { token, user_id } = req.body;
+        if (!token || !user_id) return res.status(400).json({ error: 'Token and user_id are required.' });
+
+        const user = await User.findById(user_id);
+        if (!user) return res.status(404).json({ error: 'User not found.' });
+
+        // Verify the token
+        const verified = speakeasy.totp.verify({
+            secret: user.secret_key,
+            encoding: 'base32',
+            token
+        });
+
+        if (verified) {
+            await User.findOneAndUpdate({ _id: user_id }, { $set: { completed_2fa: true } });
+            return res.json({ message: '2FA verification successful!' });
+        } else {
+            return res.status(400).json({ message: 'Invalid code. Please try again.' });
+        }
+    } catch (error) {
+        return res.status(500).json({ message: "Captcha verification failed" });
+    }
 });
 
 app.get('*', (req, res) => {
