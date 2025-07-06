@@ -9,9 +9,19 @@ const validator = require('validator');
     * @param {Response} res - response
     * @returns {Response}
 */
-const register = async (req, res) => {
+const register = async (req, res, encryptData, decryptData) => {
     try {
-        const { username, password, email, account_type } = req;
+        let { username, password, email, account_type, client_key } = req;
+
+        const decryptedUsername = (await decryptData(username)).toString('utf8');
+        const decryptedPassword = (await decryptData(password)).toString('utf8');
+        const decryptedEmail = (await decryptData(email)).toString('utf8');
+        const decryptedAccountType = (await decryptData(account_type)).toString('utf8');
+
+        username = decryptedUsername;
+        password = decryptedPassword;
+        email = decryptedEmail;
+        account_type = decryptedAccountType;
 
         if (username === "") return res.status(400).json({ message: "Please enter a username" });
         const sanitizedUsername = validator.escape(username);
@@ -40,7 +50,7 @@ const register = async (req, res) => {
         });
 
         await newMember.save();
-        return res.json({ message: "You are now registered", user_id: newMember._id });
+        return res.json({ message: "You are now registered", user_id: await encryptData(client_key, newMember._id) });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: err.message });

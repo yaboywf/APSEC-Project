@@ -3,7 +3,7 @@ import axios from "axios";
 import '../styles/login.scss';
 import '../styles/register.scss';
 import { useNavigate } from 'react-router-dom';
-import { showMessage } from './Functions';
+import { showMessage, encryptData, generateKeys, decryptData } from './Functions';
 import ReCAPTCHA from 'react-google-recaptcha';
 
 function Register() {
@@ -12,6 +12,9 @@ function Register() {
 	const [password, setPassword] = useState("");
 	const [email, setEmail] = useState("");
 	const [accountType, setAccountType] = useState("");
+	const [publicKey, setPublicKey] = useState(null);
+	const [clientPrivateKey, setClientPrivateKey] = useState(null);
+	const [clientPublicKeyPem, setClientPublicKeyPem] = useState(null);
 
 	useEffect(() => {
 		// Dynamically load reCAPTCHA script
@@ -24,6 +27,27 @@ function Register() {
 		// Clean up the old script if any
 		const oldScript = document.querySelector('script[src="https://www.google.com/recaptcha/api.js?onload=onloadcallback&render=explicit"]');
 		if (oldScript) document.body.removeChild(oldScript);
+
+		// Generate keys
+		const getKeys = async () => {
+			try {
+				const { privateKey, publicKeyPem } = await generateKeys();
+				setClientPrivateKey(privateKey);
+				setClientPublicKeyPem(publicKeyPem);
+			} catch (error) {
+				console.error('Key generation failed:', error);
+			}
+		}
+
+		getKeys();
+
+		// Get server public key
+		axios.get('/api/public_key')
+			.then(resp => setPublicKey(resp.data.publicKey))
+			.catch(error => {
+				showMessage('Failed to fetch public key');
+				console.error('Error fetching public key:', error);
+			});
 
 		// Cleanup when component unmounts
 		return () => document.body.removeChild(script);
@@ -40,22 +64,32 @@ function Register() {
 		if (!e.target.checkValidity()) return;
 
 		try {
-			await window.grecaptcha.ready(() => {
-				window.grecaptcha.execute('6Ld4encrAAAAABBPqZ_HHZCdDAzUSgbsiLklmkKP', { action: 'signUp' })
-					.then((token) => {
-						axios.post("/api/auth/register", { username, password, email, account_type: accountType, captchaToken: token }, { withCredentials: true })
-							.then(resp => {
-								navigate("/register2", { state: { userId: resp.data.user_id } });
-							})
-							.catch(err => {
-								console.error(err);
-								showMessage(err.response.data.message || "Registration failed");
-							});
-					})
-					.catch(err => {
-						console.error('Error during reCAPTCHA execution:', err);
-					})
+			const captchaToken = await new Promise((resolve, reject) => {
+				window.grecaptcha.ready(() => {
+					window.grecaptcha.execute('6Ld4encrAAAAABBPqZ_HHZCdDAzUSgbsiLklmkKP', { action: 'login' })
+						.then(resolve)
+						.catch(reject);
+				});
 			});
+
+			if (!publicKey) return showMessage('Cannot get public key');
+
+			const encryptedUsername = await encryptData(publicKey, username);
+			const encryptedPassword = await encryptData(publicKey, password);
+			const encryptedEmail = await encryptData(publicKey, email);
+			const encryptedAccountType = await encryptData(publicKey, accountType);
+			if (!encryptedUsername || !encryptedPassword || !encryptedEmail || !encryptedAccountType) return showMessage('Encryption failed');
+
+			axios.post("/api/auth/register", { username: encryptedUsername, password: encryptedPassword, email: encryptedEmail, account_type: encryptedAccountType, captchaToken, client_key: clientPublicKeyPem }, { withCredentials: true })
+				.then(async (resp) => {
+					let userId = await decryptData(clientPrivateKey, resp.data.user_id);
+					console.log(userId);
+					navigate("/register2", { state: { userId } });
+				})
+				.catch(err => {
+					console.error(err);
+					showMessage(err.response.data.message || "Registration failed");
+				});
 		} catch (err) {
 			console.error('Error during reCAPTCHA execution:', err);
 		}

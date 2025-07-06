@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { showMessage } from "./Functions";
+import { showMessage, encryptData } from "./Functions";
 import axios from "axios";
 import '../styles/register2.scss';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -10,12 +10,11 @@ function Login2() {
     const navigate = useNavigate();
     const { user, message } = location.state || {};
     const [code, setCode] = useState("");
+    const [publicKey, setPublicKey] = useState(null);
 
     useEffect(() => {
-        if (!user || !user.completed_2fa || !user.secret_key) navigate("/login");
-    }, [navigate, user]);
+        if (!user || !user.secret_key) navigate("/login");
 
-    useEffect(() => {
         // Dynamically load reCAPTCHA script
         const script = document.createElement('script');
         script.src = `https://www.google.com/recaptcha/api.js?render=6Ld4encrAAAAABBPqZ_HHZCdDAzUSgbsiLklmkKP`;
@@ -27,9 +26,17 @@ function Login2() {
         const oldScript = document.querySelector('script[src="https://www.google.com/recaptcha/api.js?onload=onloadcallback&render=explicit"]');
         if (oldScript) document.body.removeChild(oldScript);
 
+        // Get server public key
+        axios.get('/api/public_key')
+            .then(resp => setPublicKey(resp.data.publicKey))
+            .catch(error => {
+                showMessage('Failed to fetch public key');
+                console.error('Error fetching public key:', error);
+            });
+
         // Cleanup when component unmounts
         return () => document.body.removeChild(script);
-    }, []);
+    }, [navigate, user]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -38,26 +45,30 @@ function Login2() {
         if (!e.target.checkValidity()) return;
 
         try {
-            await window.grecaptcha.ready(() => {
-                window.grecaptcha.execute('6Ld4encrAAAAABBPqZ_HHZCdDAzUSgbsiLklmkKP', { action: 'verify_2fa' })
-                    .then((token1) => {
-
-                        axios.post("/api/auth/verify_2fa", { token: code, user_id: user._id, captchaToken: token1 }, { withCredentials: true })
-                            .then(() => {
-                                showMessage(message, "success");
-                                navigate(`/${user?.account_type}` || '/login');
-                            })
-                            .catch(err => {
-                                console.error(err);
-                                showMessage(err.response.data.message || "Registration failed");
-                            });
-                    })
-                    .catch(err => {
-                        console.error('Error during reCAPTCHA execution:', err);
-                    })
+            const captchaToken = await new Promise((resolve, reject) => {
+                window.grecaptcha.ready(() => {
+                    window.grecaptcha.execute('6Ld4encrAAAAABBPqZ_HHZCdDAzUSgbsiLklmkKP', { action: 'login' })
+                        .then(resolve)
+                        .catch(reject);
+                });
             });
+
+            if (!publicKey) return showMessage('Cannot get public key');
+
+            const encryptedCode = await encryptData(publicKey, code);
+            if (!encryptedCode) return showMessage('Encryption failed');
+
+            axios.post("/api/auth/verify_2fa", { token: encryptedCode, user_id: user._id, captchaToken }, { withCredentials: true })
+                .then(() => {
+                    showMessage(message, "success");
+                    navigate(`/${user?.account_type}` || '/login', { state: { fa: true } });
+                })
+                .catch(err => {
+                    console.error(err);
+                    showMessage(err.response.data.message || "Registration failed");
+                });
         } catch (err) {
-            console.error('Error during reCAPTCHA execution:', err);
+            console.error('Error during 2FA verification:', err);
         }
     }
 

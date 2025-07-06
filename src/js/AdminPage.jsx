@@ -1,26 +1,56 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { showMessage } from './Functions';
-import { useNavigate } from 'react-router-dom';
+import { showMessage, decryptData, generateKeys } from './Functions';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function AdminPage() {
     const [isAuthenticated, setIsAuthenticated] = useState(null);
     const [userInfo, setUserInfo] = useState({});
+    const [apiResponse, setApiResponse] = useState({});
     const navigate = useNavigate();
+    const location = useLocation();
+    const { fa } = location.state || {};
 
     useEffect(() => {
-        axios.get("/api/auth/verify", { headers: { "Content-Type": "application/json" }, withCredentials: true })
-            .then(resp => {
-                if (resp.data.user.account_type !== "admin") throw new Error("You do not have the required permissions");
-                setIsAuthenticated(true);
-                setUserInfo(resp.data.user);
-            })
+        const getKeys = async () => {
+            try {
+                const { privateKey, publicKeyPem } = await generateKeys();
+                axios.get("/api/auth/verify", { headers: { "Content-Type": "application/json", "client_key": btoa(publicKeyPem.replace(/\n/g, '')) }, withCredentials: true })
+                    .then(async (resp) => {
+                        let user = await decryptData(privateKey, resp.data.user);
+                        user = JSON.parse(user);
+                        if (user.account_type !== "admin") throw new Error("You do not have the required permissions");
+                        setIsAuthenticated(true);
+                        setUserInfo(user);
+                    })
+                    .catch(err => {
+                        setIsAuthenticated(false);
+                        showMessage(`Authentication failed: ${err.response?.data?.message || err.message || "Unknown error"}`);
+                        navigate('/login');
+                    });
+            } catch (error) {
+                console.error('Key generation failed:', error);
+            }
+        }
+
+        getKeys();
+
+        if (!fa) {
+            axios.post("/api/auth/logout", {}, { withCredentials: true })
+                .then(() => {
+                    showMessage("Authentication failed: 2FA not done");
+                    navigate('/login');  
+                })
+                .catch(err => console.error(err));
+        };
+
+        axios.get("/api/admin", { headers: { "Content-Type": "application/json" }, withCredentials: true })
+            .then(resp => setApiResponse(resp.data))
             .catch(err => {
-                setIsAuthenticated(false);
-                showMessage(`Authentication failed: ${err.response?.data?.message || err.message || "Unknown error"}`);
-                navigate('/login');
+                console.error(err);
+                showMessage(`API request failed: ${err.response?.data?.message || err.message || "Unknown error"}`);
             });
-    }, [navigate]);
+    }, [navigate, fa]);
 
     const logout = () => {
         axios.post("/api/auth/logout", {}, { headers: { "Content-Type": "application/json" }, withCredentials: true })
@@ -49,6 +79,8 @@ function AdminPage() {
 
                 <button onClick={logout}>Logout</button>
             </>}
+
+            {(isAuthenticated && apiResponse.message) && <p>API Response: {apiResponse.message}</p>}
         </div>
     );
 }

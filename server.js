@@ -8,6 +8,15 @@ const speakeasy = require("speakeasy");
 const qrcode = require("qrcode");
 const cron = require('node-cron');
 const axios = require("axios");
+const cors = require('cors');
+const crypto = require('crypto');
+const { promisify } = require('util');
+
+const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+    publicKeyEncoding: { type: 'spki', format: 'pem' },
+    privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+});
 
 const { register, verify, logout } = require("./controller/authFunctions");
 const User = require('./database/users');
@@ -41,6 +50,13 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(cors({
+    origin: 'http://localhost:3001', // Allow requests from the frontend
+    methods: ['GET', 'POST'],       // Allow specific HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+    credentials: true
+}));
 
 // Helmet
 /*  Secure your Express applications by setting various HTTP headers. 
@@ -107,16 +123,67 @@ cron.schedule('0 0 * * *', async () => {
     });
 });
 
+const decryptData = async (encryptedBase64) => {
+    try {
+        const encryptedBuffer = Buffer.from(encryptedBase64, 'base64');
+        const decrypted = crypto.privateDecrypt({
+            key: privateKey,
+            padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+            oaepHash: 'sha256'
+        }, encryptedBuffer);
+        return decrypted;
+    } catch (error) {
+        console.error('Decryption error:', error);
+        throw new Error('Decryption failed: ' + error.message);
+    }
+};
+
+const encryptData = async (clientPublicKeyPem, data) => {
+    try {
+        // Convert PEM to CryptoKey
+        const pemContents = clientPublicKeyPem
+            .replace('-----BEGIN PUBLIC KEY-----', '')
+            .replace('-----END PUBLIC KEY-----', '')
+            .replace(/\s+/g, '');
+
+        const binaryDer = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
+
+        const publicKey = await crypto.subtle.importKey(
+            'spki',
+            binaryDer,
+            { name: 'RSA-OAEP', hash: 'SHA-256' },
+            true,
+            ['encrypt']
+        );
+
+        // Encrypt
+        const encrypted = await crypto.subtle.encrypt(
+            { name: 'RSA-OAEP' },
+            publicKey,
+            new TextEncoder().encode(data)
+        );
+
+        // Return Base64
+        return Buffer.from(encrypted).toString('base64');
+    } catch (err) {
+        console.error("Client key encryption failed:", err);
+        throw new Error("Invalid client public key");
+    }
+};
+
 // Route for register
 app.post("/api/auth/register", async (req, res) => {
     const captcha = req.body.captchaToken;
+
+    if (!captcha) return res.status(400).json({ message: "No captcha token" });
 
     try {
         const captchaResponse = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${process.env.CAPTCHA_SECRET}&response=${captcha}`);
         const score = captchaResponse.data.score;
 
-        if (!score || score < 0.7) return res.status(400).json({ message: "Captcha verification failed" });
-        register(req.body, res);
+        if (!score || score < 0.7) return res.status(400).json({ message: "Captcha verification failed" });        
+
+        register(req.body, res, encryptData, decryptData);
     } catch (error) {
         return res.status(400).json({ message: "Captcha verification failed" });
     }
@@ -126,31 +193,75 @@ app.post("/api/auth/register", async (req, res) => {
 app.post("/api/auth/login", async (req, res, next) => {
     const captcha = req.body.captchaToken;
 
+    if (!captcha) return res.status(400).json({ message: "No captcha token" });
+
     try {
         const captchaResponse = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${process.env.CAPTCHA_SECRET}&response=${captcha}`);
         const score = captchaResponse.data.score;
 
         if (!score || score < 0.7) return res.status(400).json({ message: "Captcha verification failed" });
 
+        const username = req.body.username;
+        const password = req.body.password;
+
+        if (!username || !password) return res.status(400).json({ message: "Please enter a username and password" });
+
+        const decryptedUsername = (await decryptData(username)).toString('utf8');
+        const decryptedPassword = (await decryptData(password)).toString('utf8');
+
+        req.body.username = decryptedUsername;
+        req.body.password = decryptedPassword;
+
         passport.authenticate('local', (err, user, info) => {
-            if (err) { return next(err); }
+            if (err) return next(err);
             if (!user) {
-                return res.status(401).json({ message: info.message || 'Login failed' });
+                return res.status(401).json({ message: info.message, user_id: info?.user_id || 'Login failed' });
             }
 
-            req.logIn(user, (err) => {
-                if (err) { return next(err); }
-                return res.json({ message: `Welcome back, ${user.name}!`, user: user });
+            if (!req.body.client_key) return res.status(400).json({ error: "No client key" })
+
+            req.logIn(user, async (err) => {
+                if (err) return next(err);
+
+                const userCopy = { ...user._doc };
+
+                delete userCopy.password;
+                delete userCopy.completed_2fa;
+                delete userCopy.register_time;
+                delete userCopy.createdAt;
+                delete userCopy.updatedAt;
+                delete userCopy.__v;
+                delete userCopy.name;
+                delete userCopy.email;
+
+                return res.json({ message: `Welcome back, ${user.name}!`, user: await encryptData(req.body.client_key, JSON.stringify(userCopy)) });
             });
         })(req, res, next);
     } catch (error) {
-        return res.status(500).json({ message: "Captcha verification failed" });
+        return res.status(500).json({ message: error.message });
     }
 });
 
+// Route to get public key
+app.get('/api/public_key', (req, res) => {
+    return res.json({ publicKey });
+});
+
 // Route to verify user for frontend
-app.get("/api/auth/verify", verify(), (req, res) => {
-    return res.json({ user: req.user });
+app.get("/api/auth/verify", verify(), async (req, res) => {
+    const userCopy = { ...req.user._doc };
+
+    delete userCopy.password;
+    delete userCopy.completed_2fa;
+    delete userCopy.register_time;
+    delete userCopy.createdAt;
+    delete userCopy.updatedAt;
+    delete userCopy.__v;
+    delete userCopy.secret_key;
+    delete userCopy._id;
+    console.log(userCopy);
+
+    return res.json({ user: await encryptData(atob(req.headers.client_key), JSON.stringify(userCopy)) });
 });
 
 // Protected page. Only admin can access.
@@ -222,6 +333,8 @@ app.post('/api/auth/verify_2fa', async (req, res) => {
         const { token, user_id } = req.body;
         if (!token || !user_id) return res.status(400).json({ error: 'Token and user_id are required.' });
 
+        const decryptedToken = (await decryptData(token)).toString('utf8');
+        
         const user = await User.findById(user_id);
         if (!user) return res.status(404).json({ error: 'User not found.' });
 
@@ -229,7 +342,7 @@ app.post('/api/auth/verify_2fa', async (req, res) => {
         const verified = speakeasy.totp.verify({
             secret: user.secret_key,
             encoding: 'base32',
-            token
+            token: decryptedToken
         });
 
         if (verified) {
@@ -239,7 +352,7 @@ app.post('/api/auth/verify_2fa', async (req, res) => {
             return res.status(400).json({ message: 'Invalid code. Please try again.' });
         }
     } catch (error) {
-        return res.status(500).json({ message: "Captcha verification failed" });
+        return res.status(500).json({ message: `Error verifying 2FA: ${error.message}` });
     }
 });
 
