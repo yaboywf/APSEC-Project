@@ -19,7 +19,7 @@ function Login() {
 		if (!password || password === "") showError("password_error", "Please enter a password");
 		if (!e.target.checkValidity()) return;
 
-		axios.post("/api/auth/login", { username, password }, { headers: { "Content-Type": "application/json" }, withCredentials: true })
+		axios.post("/api/auth/login", { username, password }, { withCredentials: true })
 		.then(resp => {
 			addError(resp.data.message, "success");
 			navigate(`/${resp.data?.user?.account_type}` || '/login');
