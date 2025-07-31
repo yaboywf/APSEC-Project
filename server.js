@@ -10,7 +10,6 @@ const cron = require('node-cron');
 const axios = require("axios");
 const cors = require('cors');
 const crypto = require('crypto');
-const { promisify } = require('util');
 
 const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
     modulusLength: 2048,
