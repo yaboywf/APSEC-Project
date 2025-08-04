@@ -83,7 +83,6 @@ function Register() {
 			axios.post("/api/auth/register", { username: encryptedUsername, password: encryptedPassword, email: encryptedEmail, account_type: encryptedAccountType, captchaToken, client_key: clientPublicKeyPem }, { withCredentials: true })
 				.then(async (resp) => {
 					let userId = await decryptData(clientPrivateKey, resp.data.user_id);
-					console.log(userId);
 					navigate("/register2", { state: { userId } });
 				})
 				.catch(err => {

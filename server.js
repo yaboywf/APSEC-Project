@@ -207,7 +207,7 @@ app.post("/api/auth/login", async (req, res, next) => {
 
         const decryptedUsername = (await decryptData(username)).toString('utf8');
         const decryptedPassword = (await decryptData(password)).toString('utf8');
-
+        
         req.body.username = decryptedUsername;
         req.body.password = decryptedPassword;
 
@@ -258,8 +258,7 @@ app.get("/api/auth/verify", verify(), async (req, res) => {
     delete userCopy.__v;
     delete userCopy.secret_key;
     delete userCopy._id;
-    console.log(userCopy);
-
+    
     return res.json({ user: await encryptData(atob(req.headers.client_key), JSON.stringify(userCopy)) });
 });
 
